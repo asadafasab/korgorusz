@@ -68,6 +68,14 @@ def mnist(path, names: List[str]) -> Tuple[array, array, array, array]:
     return x, y, x_test, y_test
 
 
+def normalize(x, l2=True, axis=1):
+    if l2:
+        norm = np.linalg.norm(x, axis=axis)
+    else:
+        norm = np.linalg.norm(x, axis=axis, ord=1)
+    return x / norm
+
+
 def mse(x: array, y: array) -> Tuple[float, array]:
     """
     Mean squared error loss.
