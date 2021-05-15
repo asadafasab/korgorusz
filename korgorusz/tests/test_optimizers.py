@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 from korgorusz.optimizers import *
-from korgorusz.tests.test_utils import isclose, generate_linear_dataset
+from korgorusz.tests.utils_for_test import isclose, generate_linear_dataset
 from korgorusz.layers import Linear
 from korgorusz.utils import mse, normalize
 

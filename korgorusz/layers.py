@@ -31,23 +31,29 @@ class Base:
 
 
 class Linear(Base):
-    def __init__(self, inputs: int, outputs: int):
+    def __init__(self, inputs: int, outputs: int, bias: bool = True):
         super().__init__()
         tensor = np.random.randn(inputs, outputs) * np.sqrt(1 / inputs)
         self.weights = self.create_element(tensor)
-        self.bias = self.create_element(np.zeros(outputs))
+        if bias:
+            self.bias = self.create_element(np.zeros(outputs))
+        else:
+            self.bias = None
 
     def forward(self, x: array) -> Tuple[array, Callable]:
         def backward(derivative: array) -> array:
             self.weights.gradient += x.T @ derivative
-            self.bias.gradient += derivative.sum(axis=0)
+            if self.bias:
+                self.bias.gradient += derivative.sum(axis=0)
             return derivative @ self.weights.tensor.T
 
-        return x @ self.weights.tensor + self.bias.tensor, backward
+        if self.bias:
+            return x @ self.weights.tensor + self.bias.tensor, backward
+        return x @ self.weights.tensor, backward
 
 
 class Dropout(Base):
-    def __init__(self, dropout_rate: float, training: bool = True):
+    def __init__(self, dropout_rate: float):
         super().__init__()
         self.dropout_rate = dropout_rate
 
@@ -68,7 +74,7 @@ class ReLU(Base):
         def backward(derivative: array) -> array:
             return np.where(x > 0, derivative, 0)
 
-        return np.clip(x, 0, None), backward
+        return x * (x > 0), backward
 
 
 class Softmax(Base):

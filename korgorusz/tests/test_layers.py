@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from korgorusz.layers import *
-from korgorusz.tests.test_utils import isclose, sample_array
+from korgorusz.tests.utils_for_test import isclose, sample_array
 
 
 # torch.set_printoptions(precision=7)
@@ -87,3 +87,11 @@ def test_linear(sample_array):
     a, _ = lin.forward(sample_array)
     print(a)
     assert isclose(a, correct)
+
+
+def test_dropout(sample_array):
+    sample_array += 1
+    d = Dropout(0.5)
+    out, _ = d.forward(sample_array)
+
+    assert np.count_nonzero(out == 0) >= 3
