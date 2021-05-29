@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from korgorusz.layers import *
-from korgorusz.tests.utils_for_test import isclose, sample_array
+from korgorusz.tests.utils_for_test import *
 
 
 # torch.set_printoptions(precision=7)
@@ -11,8 +11,8 @@ np.random.seed(42)
 def test_relu(sample_array):
     correct = np.array([[10, 1, 0, 3, 0, 0, 9], [5, 6, 2, 3, 0, 7, 2]])
     activation = ReLU()
-    a, _ = activation.forward(sample_array)
-    assert (correct == a).all()
+    out, _ = activation.forward(sample_array)
+    assert (correct == out).all()
 
 
 def test_softmax(sample_array):
@@ -40,8 +40,8 @@ def test_softmax(sample_array):
     )
 
     sm = Softmax()
-    a, _ = sm.forward(sample_array)
-    assert isclose(a, correct)
+    out, _ = sm.forward(sample_array)
+    assert isclose(out, correct)
 
 
 def test_sigmoid(sample_array):
@@ -69,8 +69,8 @@ def test_sigmoid(sample_array):
     )
 
     sig = Sigmoid()
-    a, _ = sig.forward(sample_array)
-    assert isclose(a, correct)
+    out, _ = sig.forward(sample_array)
+    assert isclose(out, correct)
 
 
 def test_linear(sample_array):
@@ -84,9 +84,8 @@ def test_linear(sample_array):
     lin = Linear(7, 4)
     lin.weights.tensor.fill(0.01)
     lin.bias.tensor.fill(0.01)
-    a, _ = lin.forward(sample_array)
-    print(a)
-    assert isclose(a, correct)
+    out, _ = lin.forward(sample_array)
+    assert isclose(out, correct)
 
 
 def test_dropout(sample_array):
@@ -95,3 +94,21 @@ def test_dropout(sample_array):
     out, _ = d.forward(sample_array)
 
     assert np.count_nonzero(out == 0) >= 3
+
+
+def test_layer_norm(sample_array):
+    correct = np.array(
+        [[ 1.9011403, -0.6203722, -1.1807083, -0.0600361, -0.9005402, -0.9005402,
+          1.6209723],
+        [ 0.5003000,  0.7804681, -0.3402041, -0.0600361, -1.4608763,  1.0606362,
+         -0.3402041]]
+    )
+    ln = LayerNorm(7)
+    out, _ = ln.forward(sample_array)
+    assert isclose(out, correct)
+
+
+def test_embeding(rows_array):
+    emb = Embedding(6, 4)
+    out, _ = emb.forward(rows_array) 
+    assert out.shape == (5, 4)

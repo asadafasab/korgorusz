@@ -21,7 +21,7 @@ class Base:
     def __init__(self):
         self.elements: List[Element] = []
 
-    def forward(self, X: array):
+    def forward(self, x: array):
         raise NotImplementedError
 
     def create_element(self, tensor: array) -> Element:
@@ -31,7 +31,7 @@ class Base:
 
 
 class Linear(Base):
-    def __init__(self, inputs: int, outputs: int, bias: bool = True):
+    def __init__(self, inputs: int, outputs: int, bias: Optional[bool] = True):
         super().__init__()
         tensor = np.random.randn(inputs, outputs) * np.sqrt(1 / inputs)
         self.weights = self.create_element(tensor)
@@ -67,6 +67,78 @@ class Dropout(Base):
             return derivative * mask
 
         return x * mask, backward
+
+
+class Norm(Base):
+    def __init__(self, shape):
+        super().__init__()
+        self.eps = eps
+        self.weights = self.create_element(np.ones(shape))
+        self.bias = self.create_element(np.zeros(shape))
+
+        # TODO parent class for layerNorm and batchNorm (?)
+
+
+class LayerNorm(Base):
+    def __init__(
+        self, shape: Tuple[int,...], eps: Optional[float] = 1e-05
+    ):
+        super().__init__()
+        self.eps = eps
+        self.weights = self.create_element(np.ones(shape))
+        self.bias = self.create_element(np.zeros(shape))
+
+    def forward(self, x: array) -> array:
+        x_mean = x.mean( keepdims=True)
+        x_var = np.var(x ,keepdims=True)
+        x_std = np.sqrt(x_var + self.eps)
+        x_centered = x - x_mean
+        x_norm = x_centered / x_std
+
+        def backward(derivative: array) -> array:
+            C = derivative.shape[-1]
+            self.weights.gradient += (derivative * x_norm).sum(axis=-1)
+            self.bias.gradient += derivative.sum(axis=-1)
+            dx_norm = derivative * self.weights.tensor
+            return (
+                1
+                / C
+                / x_std
+                * (
+                    C * dx_norm
+                    - dx_norm.sum(axis=-1)
+                    - x_norm * (dx_norm * x_norm).sum(axis=-1)
+                )
+            )
+
+        return (x_norm * self.weights.tensor) + self.bias.tensor, backward
+
+
+class Embedding(Base):
+    def __init__(
+        self, num_embeddings: int, embedding_dim: int, padding_idx: Optional[int] = None
+    ):
+        super().__init__()
+        self.num_embeddings = num_embeddings
+        self.embedding_dim = embedding_dim
+        self.padding_idx = padding_idx
+
+        tensor = np.random.randn(num_embeddings, embedding_dim) * np.sqrt(
+            1 / embedding_dim
+        )
+        if padding_idx:
+            tensor = tensor[padding_idx] = 0
+        self.weights = self.create_element(tensor)
+
+    def forward(self, x: array) -> Tuple[array, Callable]:
+        msg = "Error: Embeding input must int type"
+        assert x.dtype == np.int64() or np.int32() or np.int16() or np.int8(), msg
+
+        def backward(derivative: array) -> array:
+            # TODO trainable
+            return derivative @ self.weights.tensor.T
+
+        return self.weights.tensor[x], backward
 
 
 class ReLU(Base):

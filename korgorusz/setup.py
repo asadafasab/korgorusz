@@ -11,6 +11,6 @@ setup(
     description="Simple set of machine learning alghoritms",
     packages=find_packages(exclude=["tests*"]),
     install_requires=["numpy"],
-    setup_requires=['wheel'],
+    setup_requires=["wheel"],
     extras_require={"dev": ["pytest", "black", "mypy"]},
 )
