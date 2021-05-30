@@ -17,5 +17,5 @@ def rows_array():
 
 
 @pytest.fixture
-def generate_linear_dataset(a=0.2, b=1, samples=8):
+def generate_linear_dataset(a=0.2, b=1, samples=16):
     return np.array([[x, (a * x) + b] for x in range(-samples, samples)]), a

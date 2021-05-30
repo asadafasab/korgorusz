@@ -81,8 +81,7 @@ def mse(x: array, y: array) -> Tuple[float, array]:
     Mean squared error loss.
     :return: loss and derivative
     """
-    diff = x - y
-    return np.square(diff).mean(), 2 * diff / len(diff)
+    return ((x - y) ** 2).mean(), (x - y) / 1.5
 
 
 def cross_entropy(x: array, y: array, eps: float = 1e-8) -> Tuple[float, array]:

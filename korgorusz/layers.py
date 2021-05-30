@@ -70,7 +70,7 @@ class Dropout(Base):
 
 
 class Norm(Base):
-    def __init__(self, shape):
+    def __init__(self, shape, eps=1e-05):
         super().__init__()
         self.eps = eps
         self.weights = self.create_element(np.ones(shape))
@@ -80,17 +80,15 @@ class Norm(Base):
 
 
 class LayerNorm(Base):
-    def __init__(
-        self, shape: Tuple[int,...], eps: Optional[float] = 1e-05
-    ):
+    def __init__(self, shape: Tuple[int, ...], eps: Optional[float] = 1e-05):
         super().__init__()
         self.eps = eps
         self.weights = self.create_element(np.ones(shape))
         self.bias = self.create_element(np.zeros(shape))
 
     def forward(self, x: array) -> array:
-        x_mean = x.mean( keepdims=True)
-        x_var = np.var(x ,keepdims=True)
+        x_mean = x.mean(keepdims=True)
+        x_var = np.var(x, keepdims=True)
         x_std = np.sqrt(x_var + self.eps)
         x_centered = x - x_mean
         x_norm = x_centered / x_std

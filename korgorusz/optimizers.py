@@ -29,14 +29,14 @@ class SGDOptimizer(Optimizer):
 class Momentum(Optimizer):
     def __init__(self, lr: float = 0.01, momentum=0.5):
         self.lr = lr
-        self.velocity = [0]
+        self.velocity = {}
         self.momentum = momentum
 
     def update(self, elements: List[Element]) -> None:
-        if len(self.velocity) == 1:
-            self.velocity *= len(elements)
-
         for i in range(len(elements)):
+            if i not in self.velocity:
+                self.velocity[i] = np.zeros_like(elements[i].gradient)
+
             self.velocity[i] = self.momentum * self.velocity[i] + elements[i].gradient
             elements[i].tensor -= self.lr * self.velocity[i]
 
@@ -58,36 +58,40 @@ class Adam(Optimizer):
         self,
         lr: float = 0.001,
         beta1: float = 0.9,
-        beta2: float = 0.99,
-        eps: float = 1e-08,
+        beta2: float = 0.999,
+        eps: float = 1e-07,
     ):
         self.lr = lr
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = eps
         self.t = 0
-        self.m_d, self.v_d = [0], [0]
-
-        msg = "There is something wrong with this..."
-        raise ValueError(msg)  # TODO
+        self.before = {}
 
     def update(self, elements: List[Element]) -> None:
-        if len(self.m_d) == 1:
-            self.m_d *= len(elements)
-            self.v_d *= len(elements)
-
         for i in range(len(elements)):
-            self.m_d[i] = (
-                self.beta1 * self.m_d[i] + (1 - self.beta1) * elements[i].gradient
-            )
-            self.v_d[i] = self.beta2 * self.v_d[i] + (1 - self.beta1) * (
-                elements[i].gradient ** 2
-            )
+            self.t += 1
+            if i not in self.before:
+                self.before[i] = {
+                    "mean": np.zeros_like(elements[i].gradient),
+                    "var": np.zeros_like(elements[i].gradient),
+                }
 
-            m_d_corr = self.m_d[i] / (1 - self.beta1 ** self.t)
-            v_d_corr = self.v_d[i] / (1 - self.beta2 ** self.t)
+            if np.linalg.norm(elements[i].gradient) > np.inf:
+                elements[i].gradient = (
+                    elements[i].gradient * np.inf / np.linalg.norm(elements[i].gradient)
+                )
 
-            update = m_d_corr / (np.square(v_d_corr) + self.eps)
+            mean = self.before[i]["mean"]
+            var = self.before[i]["var"]
 
-            elements[i].tensor -= self.lr * update
+            mean = self.beta1 * mean + (1 - self.beta1) * elements[i].gradient
+            var = self.beta2 * var + (1 - self.beta2) * (elements[i].gradient ** 2)
+            self.before[i] = {"mean": mean, "var": var}
+
+            var_corrected = var / (1 - self.beta2 ** self.t)
+            mean_corrected = mean / (1 - self.beta1 ** self.t)
+            update = self.lr * mean_corrected / (np.sqrt(var_corrected) + self.eps)
+
+            elements[i].tensor -= update
             elements[i].gradient.fill(0)

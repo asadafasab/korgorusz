@@ -1,10 +1,17 @@
 import pytest
 import numpy as np
-from korgorusz.layers import *
-from korgorusz.tests.utils_for_test import *
+from korgorusz.layers import (
+    Linear,
+    ReLU,
+    Sigmoid,
+    Softmax,
+    Dropout,
+    LayerNorm,
+    Embedding,
+)
+from korgorusz.tests.utils_for_test import sample_array, isclose, rows_array
 
 
-# torch.set_printoptions(precision=7)
 np.random.seed(42)
 
 
@@ -74,6 +81,9 @@ def test_sigmoid(sample_array):
 
 
 def test_linear(sample_array):
+    rand = np.random.randn(64, 20)
+    lin = Linear(20, 30)
+    assert lin.forward(rand)[0].shape == (64, 30)
     correct = np.array(
         [
             [0.2300000, 0.2300000, 0.2300000, 0.2300000],
@@ -98,10 +108,26 @@ def test_dropout(sample_array):
 
 def test_layer_norm(sample_array):
     correct = np.array(
-        [[ 1.9011403, -0.6203722, -1.1807083, -0.0600361, -0.9005402, -0.9005402,
-          1.6209723],
-        [ 0.5003000,  0.7804681, -0.3402041, -0.0600361, -1.4608763,  1.0606362,
-         -0.3402041]]
+        [
+            [
+                1.9011403,
+                -0.6203722,
+                -1.1807083,
+                -0.0600361,
+                -0.9005402,
+                -0.9005402,
+                1.6209723,
+            ],
+            [
+                0.5003000,
+                0.7804681,
+                -0.3402041,
+                -0.0600361,
+                -1.4608763,
+                1.0606362,
+                -0.3402041,
+            ],
+        ]
     )
     ln = LayerNorm(7)
     out, _ = ln.forward(sample_array)
@@ -110,5 +136,5 @@ def test_layer_norm(sample_array):
 
 def test_embeding(rows_array):
     emb = Embedding(6, 4)
-    out, _ = emb.forward(rows_array) 
+    out, _ = emb.forward(rows_array)
     assert out.shape == (5, 4)
