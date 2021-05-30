@@ -35,19 +35,18 @@ class Linear(Base):
         super().__init__()
         tensor = np.random.randn(inputs, outputs) * np.sqrt(1 / inputs)
         self.weights = self.create_element(tensor)
-        if bias:
-            self.bias = self.create_element(np.zeros(outputs))
-        else:
-            self.bias = None
+        self.isbias = bias
+        if self.isbias:
+            self.bias: Element = self.create_element(np.zeros(outputs))
 
     def forward(self, x: array) -> Tuple[array, Callable]:
         def backward(derivative: array) -> array:
             self.weights.gradient += x.T @ derivative
-            if self.bias:
+            if self.isbias:
                 self.bias.gradient += derivative.sum(axis=0)
             return derivative @ self.weights.tensor.T
 
-        if self.bias:
+        if self.isbias:
             return x @ self.weights.tensor + self.bias.tensor, backward
         return x @ self.weights.tensor, backward
 
@@ -83,10 +82,10 @@ class LayerNorm(Base):
     def __init__(self, shape: Tuple[int, ...], eps: Optional[float] = 1e-05):
         super().__init__()
         self.eps = eps
-        self.weights = self.create_element(np.ones(shape))
-        self.bias = self.create_element(np.zeros(shape))
+        self.weights: Element = self.create_element(np.ones(shape))
+        self.bias: Element = self.create_element(np.zeros(shape))
 
-    def forward(self, x: array) -> array:
+    def forward(self, x: array) -> Tuple[array, Callable]:
         x_mean = x.mean(keepdims=True)
         x_var = np.var(x, keepdims=True)
         x_std = np.sqrt(x_var + self.eps)

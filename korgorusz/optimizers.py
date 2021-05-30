@@ -1,4 +1,4 @@
-from typing import Tuple, Callable, Optional, List
+from typing import Tuple, Callable, Optional, List, Dict
 from korgorusz.layers import Element
 import numpy as np
 
@@ -27,9 +27,9 @@ class SGDOptimizer(Optimizer):
 
 
 class Momentum(Optimizer):
-    def __init__(self, lr: float = 0.01, momentum=0.5):
+    def __init__(self, lr: float = 0.01, momentum: float = 0.5):
         self.lr = lr
-        self.velocity = {}
+        self.velocity: Dict = {}
         self.momentum = momentum
 
     def update(self, elements: List[Element]) -> None:
@@ -66,7 +66,7 @@ class Adam(Optimizer):
         self.beta2 = beta2
         self.eps = eps
         self.t = 0
-        self.before = {}
+        self.before: Dict = {}
 
     def update(self, elements: List[Element]) -> None:
         for i in range(len(elements)):

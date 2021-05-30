@@ -1,10 +1,10 @@
 <h1 align="center"><img src="./data/korgorusz_cat.svg" alt="hmmm"><br>Korgorusz<h2 align="center">Basic machine learning tool</h2></h1>
 
-<b>Korgorusz</b> is a simple set of machine learning alghoritms ...
+<b>Korgorusz</b> is a simple machine learning framework build on numpy.
 
 ## Features
 * modular design
-* very slow
+* slow
 * no GPU support
 * types
 * depends only on numpy
@@ -21,9 +21,14 @@
 
 ## Example
 ```python
+import numpy as np
+
 from korgorusz.optimizers import SGDOptimizer
 from korgorusz.layers import ReLU,Linear,Sigmoid
 from korgorusz.utils import minibatch,mse,Model
+
+x = np.random.randn(5,4)
+y = np.random.randn(5,2)
 
 class ModelLearn(Model):
     def __init__(self):
@@ -40,7 +45,7 @@ class ModelLearn(Model):
             X, b = l.forward(X)
             self.add_derivative(b)
         return X
-optim = SGDOptimizer(lr=lr)
+optim = SGDOptimizer(lr=0.01)
 ml = ModelLearn()
 
 for e in range(16):
@@ -68,6 +73,23 @@ python -m mypy korgorusz      # type checks
 python -m black korgorusz    # linting
 ```
 
+## Implemented Algorithms
+### Activations
+* ReLU
+* Softmax
+* Sigmoid
 
-### Name
+### Optimizers
+* SGD
+* Momentum
+* Adam
+
+### Layers
+* Linear
+* Dropout
+* LayerNorm
+* Embedding
+
+
+## Name
 Korgorusz is a slavic cat deamon.
