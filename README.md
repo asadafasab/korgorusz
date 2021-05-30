@@ -1,4 +1,4 @@
-<h1 align="center"><img src="./data/korgorusz_cat.svg" alt="hmmm"><br>Korgorusz<h2 align="center">Basic machine learning tool</h2></h1>
+<h1 align="center"><img src="./data/korgorusz_cat.svg" alt="hmmm"><br>Korgorusz</h1>
 
 <b>Korgorusz</b> is a simple machine learning framework build on numpy.
 
