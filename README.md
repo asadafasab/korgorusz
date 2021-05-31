@@ -1,13 +1,14 @@
 <h1 align="center"><img src="./data/korgorusz_cat.svg" alt="hmmm"><br>Korgorusz</h1>
 
-<b>Korgorusz</b> is a simple machine learning framework build on numpy.
+<b>Korgorusz</b> is a simple machine learning framework build on top of numpy.
 
 ## Features
-* modular design
-* slow
-* no GPU support
-* types
-* depends only on numpy
+* Modular design
+* Slow
+* No GPU support
+* Types
+* Depends only on numpy
+* Transformers
 
 <br>
 
@@ -42,8 +43,8 @@ class ModelLearn(Model):
 
     def forward(self, X):
         for l in self.layers:
-            X, b = l.forward(X)
-            self.add_derivative(b)
+            X, d = l.forward(X)
+            self.add_derivative(d)
         return X
 optim = SGDOptimizer(lr=0.01)
 ml = ModelLearn()
@@ -70,7 +71,7 @@ pip install korgorusz/.[dev]
 ```bash
 python -m pytest korgorusz    # test suite
 python -m mypy korgorusz      # type checks
-python -m black korgorusz    # linting
+python -m black korgorusz     # formatting
 ```
 
 ## Implemented Algorithms

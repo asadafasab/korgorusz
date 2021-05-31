@@ -69,7 +69,7 @@ class Dropout(Base):
 
 
 class Norm(Base):
-    def __init__(self, shape, eps=1e-05):
+    def __init__(self, shape, eps=1e-06):
         super().__init__()
         self.eps = eps
         self.weights = self.create_element(np.ones(shape))
@@ -79,7 +79,7 @@ class Norm(Base):
 
 
 class LayerNorm(Base):
-    def __init__(self, shape: Tuple[int, ...], eps: Optional[float] = 1e-05):
+    def __init__(self, shape: Tuple[int, ...], eps: Optional[float] = 1e-06):
         super().__init__()
         self.eps = eps
         self.weights: Element = self.create_element(np.ones(shape))
@@ -147,8 +147,8 @@ class ReLU(Base):
 
 
 class Softmax(Base):
-    def forward(self, x: array) -> Tuple[array, Callable]:
-        y = np.exp(x) / np.exp(x).sum(axis=1)[:, None]
+    def forward(self, x: array, dim: Optional[float] = 1) -> Tuple[array, Callable]:
+        y = np.exp(x) / np.exp(x).sum(axis=dim)[:, None]
 
         def backward(derivative: array) -> array:
             return y * (derivative - (derivative * y).sum(axis=1)[:, None])
