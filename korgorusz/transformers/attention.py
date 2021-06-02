@@ -1,8 +1,39 @@
+# pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-locals
 """
 Implementation of attention from Transformers
 """
 
-from korgorusz.layers import LayerNorm, Linear, Dropout, Softmax
+from korgorusz.layers import LayerNorm, Linear, Dropout, Softmax, Array
+
+
+class Attention:
+    """
+    'Attention' associate words...
+    """
+
+    def __init__(self, embed_size_pow: float, dropout_rate: float = 0.1):
+        self.embed_size_pow = embed_size_pow
+        self.dropout = Dropout(dropout_rate)
+        self.softmax = Softmax()
+
+    def forward(self, queries: Array, keys: Array, values: Array, mask: Array = None):
+        """
+        Calculates queries,keys and values.
+        """
+        derivatives = []
+        attention = (queries / self.embed_size_pow) @ keys.transpose(0, 1, 3, 2)
+
+        if mask is not None:
+            attention[mask == 0] = -1e9
+
+        attention, deriv = self.softmax.forward(attention, dim=-1)
+        derivatives.append(deriv)
+
+        attention, deriv = self.dropout.forward(attention)
+        derivatives.append(deriv)
+        output = attention @ values
+
+        return output, attention, derivatives
 
 
 class MultiHeadAttention:
@@ -16,19 +47,17 @@ class MultiHeadAttention:
         self.heads = heads
         self.d_keys = d_keys
         self.d_values = d_values
-        self.embed_size_pow = d_keys ** 0.5
 
-        self.dropout1 = Dropout(dropout_rate)
-        self.dropout2 = Dropout(dropout_rate)
-        self.softmax = Softmax()
+        self.dropout = Dropout(dropout_rate)
         self.norm = LayerNorm(d_model)
+        self.attention = Attention(d_keys ** 0.5)
 
         self.values_fc = Linear(d_model, heads * d_keys, bias=False)
         self.keys_fc = Linear(d_model, heads * d_keys, bias=False)
         self.queries_fc = Linear(d_model, heads * d_values, bias=False)
         self.out_fc = Linear(heads * d_values, d_model, bias=False)
 
-    def forward(self, query, keys, values, mask=None):
+    def forward(self, query: Array, keys: Array, values: Array, mask: Array = None):
         """
         Calculates the query,keys,values...
         """
@@ -60,23 +89,13 @@ class MultiHeadAttention:
             keys.transpose(0, 2, 1),
             values.transpose(0, 2, 1),
         )
-
-        # attention
-        attention = (query / self.embed_size_pow) @ keys.transpose(0, 1, 3, 2)
-        attention = attention @ values
-
         if mask is not None:
             mask = mask.unsqueeze(1)
-            attention[mask == 0] = -1e9
 
-        attention, deriv = self.softmax.forward(attention, dim=-1)
-        derivatives.append(deriv)
-
-        attention, deriv = self.dropout1.forward(attention)
-        derivatives.append(deriv)
+        attention = self.attention.forward(query, keys, values, mask=mask)
 
         query = query.transpose(0, 2, 1).reshape(sz_b, len_q, -1)
-        query, deriv = self.dropout2.forward(self.out_fc.forward(query))
+        query, deriv = self.dropout.forward(self.out_fc.forward(query))
         derivatives.append(deriv)
         query += residual
 

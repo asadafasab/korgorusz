@@ -1,8 +1,8 @@
+# pylint: disable=redefined-outer-name,too-many-locals,unused-import
 """
 Tests if opimizers updates elements of layers.
 """
 
-import pytest
 import numpy as np
 
 from korgorusz.optimizers import SGDOptimizer, Momentum, Adam

@@ -1,7 +1,7 @@
+# pylint: disable=redefined-outer-name,unused-import
 """
 Tests the layers.
 """
-import pytest
 import numpy as np
 from korgorusz.layers import (
     Linear,

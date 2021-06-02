@@ -1,8 +1,8 @@
+# pylint: disable=redefined-outer-name
 """
 Tests a derivatives of a layers, activations.
 """
 
-import pytest
 import numpy as np
 from korgorusz.layers import Linear
 from korgorusz.utils import mse

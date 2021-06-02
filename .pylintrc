@@ -1,0 +1,3 @@
+[BASIC]
+good-names=l2,x,y,i
+disable=too-few-public-methods

@@ -5,7 +5,7 @@ Mostly helper functions and classes that facilitate training.
 import os
 import gzip
 import pickle
-from typing import Tuple, Callable, Optional, List, Iterator
+from typing import Tuple, Callable, List, Iterator
 import numpy as np
 from korgorusz.optimizers import Optimizer
 from korgorusz.layers import Base, Array
@@ -47,15 +47,15 @@ class Model:
         """
         Pickles Model.
         """
-        with open(filename, "wb") as f:
-            pickle.dump(self.layers, f)
+        with open(filename, "wb") as file:
+            pickle.dump(self.layers, file)
 
     def load(self, filename: str):
         """
         Loads pickled Model.
         """
-        with open(filename, "rb") as f:
-            self.layers = pickle.load(f)
+        with open(filename, "rb") as file:
+            self.layers = pickle.load(file)
 
 
 def mnist(path, names: List[str]) -> Tuple[Array, Array, Array, Array]:
@@ -65,20 +65,20 @@ def mnist(path, names: List[str]) -> Tuple[Array, Array, Array, Array]:
     :names: 4 names of the gzipped files
     :return: image data and labels
     """
-    with gzip.open(os.path.join(path, names[0])) as f:
-        x = np.frombuffer(f.read(), "B", offset=16)
+    with gzip.open(os.path.join(path, names[0])) as file:
+        x = np.frombuffer(file.read(), "B", offset=16)
         x = x.reshape(-1, 784).astype("float32")
 
-    with gzip.open(os.path.join(path, names[1])) as f:
-        y = np.frombuffer(f.read(), "B", offset=8)
+    with gzip.open(os.path.join(path, names[1])) as file:
+        y = np.frombuffer(file.read(), "B", offset=8)
         y = y.astype("uint8")
 
-    with gzip.open(os.path.join(path, names[2])) as f:
-        x_test = np.frombuffer(f.read(), "B", offset=16)
+    with gzip.open(os.path.join(path, names[2])) as file:
+        x_test = np.frombuffer(file.read(), "B", offset=16)
         x_test = x_test.reshape(-1, 784).astype("float32")
 
-    with gzip.open(os.path.join(path, names[3])) as f:
-        y_test = np.frombuffer(f.read(), "B", offset=8)
+    with gzip.open(os.path.join(path, names[3])) as file:
+        y_test = np.frombuffer(file.read(), "B", offset=8)
         y_test = y_test.astype("uint8")
 
     return x, y, x_test, y_test

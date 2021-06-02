@@ -2,7 +2,7 @@
 Contains layer, activations
 """
 import random
-from typing import Callable, Iterator, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 import numpy as np
 
 
@@ -189,9 +189,9 @@ class Sigmoid(Base):
     """
 
     def forward(self, x: Array) -> Tuple[Array, Callable]:
-        s = 1 / (1 + np.exp(-x))
+        sig = 1 / (1 + np.exp(-x))
 
         def backward(derivative: Array) -> Array:
-            return derivative * s * (1 - s)
+            return derivative * sig * (1 - sig)
 
-        return s, backward
+        return sig, backward

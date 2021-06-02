@@ -2,7 +2,7 @@
 Contains Optimizers
 """
 
-from typing import Tuple, Callable, Optional, List, Dict
+from typing import List, Dict
 import numpy as np
 from korgorusz.layers import Element
 
@@ -45,14 +45,14 @@ class Momentum(Optimizer):
         self.momentum = momentum
 
     def update(self, elements: List[Element]) -> None:
-        for i in range(len(elements)):
+        for i, element in enumerate(elements):
             if i not in self.velocity:
-                self.velocity[i] = np.zeros_like(elements[i].gradient)
+                self.velocity[i] = np.zeros_like(element.gradient)
 
-            self.velocity[i] = self.momentum * self.velocity[i] + elements[i].gradient
-            elements[i].tensor -= self.learning_rate * self.velocity[i]
+            self.velocity[i] = self.momentum * self.velocity[i] + element.gradient
+            element.tensor -= self.learning_rate * self.velocity[i]
 
-            elements[i].gradient.fill(0)
+            element.gradient.fill(0)
 
 
 class Adam(Optimizer):
@@ -77,37 +77,37 @@ class Adam(Optimizer):
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = eps
-        self.t = 0
+        self.time = 0
         self.before: Dict = {}
 
     def update(self, elements: List[Element]) -> None:
-        for i in range(len(elements)):
-            self.t += 1
+        for i, element in enumerate(elements):
+            self.time += 1
             if i not in self.before:
                 self.before[i] = {
-                    "mean": np.zeros_like(elements[i].gradient),
-                    "var": np.zeros_like(elements[i].gradient),
+                    "mean": np.zeros_like(element.gradient),
+                    "var": np.zeros_like(element.gradient),
                 }
 
-            if np.linalg.norm(elements[i].gradient) > np.inf:
-                elements[i].gradient = (
-                    elements[i].gradient * np.inf / np.linalg.norm(elements[i].gradient)
+            if np.linalg.norm(element.gradient) > np.inf:
+                element.gradient = (
+                    element.gradient * np.inf / np.linalg.norm(element.gradient)
                 )
 
             mean = self.before[i]["mean"]
             var = self.before[i]["var"]
 
-            mean = self.beta1 * mean + (1 - self.beta1) * elements[i].gradient
-            var = self.beta2 * var + (1 - self.beta2) * (elements[i].gradient ** 2)
+            mean = self.beta1 * mean + (1 - self.beta1) * element.gradient
+            var = self.beta2 * var + (1 - self.beta2) * (element.gradient ** 2)
             self.before[i] = {"mean": mean, "var": var}
 
-            var_corrected = var / (1 - self.beta2 ** self.t)
-            mean_corrected = mean / (1 - self.beta1 ** self.t)
+            var_corrected = var / (1 - self.beta2 ** self.time)
+            mean_corrected = mean / (1 - self.beta1 ** self.time)
             update = (
                 self.learning_rate
                 * mean_corrected
                 / (np.sqrt(var_corrected) + self.eps)
             )
 
-            elements[i].tensor -= update
-            elements[i].gradient.fill(0)
+            element.tensor -= update
+            element.gradient.fill(0)
