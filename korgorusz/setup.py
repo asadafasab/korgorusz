@@ -1,3 +1,8 @@
+# type: ignore
+"""
+Setups the korgorusz projects (dependencies and so on)
+"""
+
 from setuptools import find_packages
 from setuptools import setup
 

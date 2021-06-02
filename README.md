@@ -8,7 +8,6 @@
 * No GPU support
 * Types
 * Depends only on numpy
-* Transformers
 
 <br>
 
@@ -46,7 +45,7 @@ class ModelLearn(Model):
             X, d = l.forward(X)
             self.add_derivative(d)
         return X
-optim = SGDOptimizer(lr=0.01)
+optim = SGDOptimizer(learning_rate=0.01)
 ml = ModelLearn()
 
 for e in range(16):

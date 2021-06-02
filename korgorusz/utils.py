@@ -1,13 +1,14 @@
-import numpy as np
-from typing import Tuple, Callable, Optional, List, Iterator
-from korgorusz.optimizers import Optimizer
-from korgorusz.layers import Base
-import pickle
-import gzip
+"""
+Mostly helper functions and classes that facilitate training.
+"""
+
 import os
-
-
-array = np.ndarray
+import gzip
+import pickle
+from typing import Tuple, Callable, Optional, List, Iterator
+import numpy as np
+from korgorusz.optimizers import Optimizer
+from korgorusz.layers import Base, Array
 
 
 class Model:
@@ -18,31 +19,46 @@ class Model:
     def __init__(self):
         self.derivatives = []
 
-    def backpropagation(self, d: Callable) -> None:
+    def backpropagation(self, deriv: Callable) -> None:
+        """
+        Inints a backpropagation and calculates all of the derivatives.
+        """
         for func in reversed(self.derivatives):
-            d = func(d)
+            deriv = func(deriv)
         self.derivatives = []
 
     def update(self, layers: List[Base], optim: Optimizer) -> None:
+        """
+        Updates weights of elemnets.
+        """
         elements = []
-        for l in layers:
-            elements.extend(l.elements)
+        for layer in layers:
+            elements.extend(layer.elements)
 
         optim.update(elements)
 
     def add_derivative(self, func: Callable) -> None:
+        """
+        Adds the derivative function to derivatives list.
+        """
         self.derivatives.append(func)
 
     def save(self, filename: str):
+        """
+        Pickles Model.
+        """
         with open(filename, "wb") as f:
             pickle.dump(self.layers, f)
 
     def load(self, filename: str):
+        """
+        Loads pickled Model.
+        """
         with open(filename, "rb") as f:
             self.layers = pickle.load(f)
 
 
-def mnist(path, names: List[str]) -> Tuple[array, array, array, array]:
+def mnist(path, names: List[str]) -> Tuple[Array, Array, Array, Array]:
     """
     Helper function for loading MNIST dataset.
     :path: path to the gzipped files
@@ -68,15 +84,20 @@ def mnist(path, names: List[str]) -> Tuple[array, array, array, array]:
     return x, y, x_test, y_test
 
 
-def normalize(x, l2=True, axis=1):
+def normalize(values, l2=True, axis=1):
+    """
+    Squeezes values into a 0 to 1 range.
+    l1(Least Absolute Deviations) - sum of the absolute values will always be up to 1
+    l2(least squares) - each row the sum of the squares will always be up to 1
+    """
     if l2:
-        norm = np.linalg.norm(x, axis=axis)
+        norm = np.linalg.norm(values, axis=axis)
     else:
-        norm = np.linalg.norm(x, axis=axis, ord=1)
-    return x / norm
+        norm = np.linalg.norm(values, axis=axis, ord=1)
+    return values / norm
 
 
-def mse(x: array, y: array) -> Tuple[float, array]:
+def mse(x: Array, y: Array) -> Tuple[float, Array]:
     """
     Mean squared error loss.
     :return: loss and derivative
@@ -84,25 +105,28 @@ def mse(x: array, y: array) -> Tuple[float, array]:
     return ((x - y) ** 2).mean(), (x - y) / 1.5
 
 
-def cross_entropy(x: array, y: array, eps: float = 1e-8) -> Tuple[float, array]:
+def cross_entropy(x: Array, y: Array, eps: float = 1e-8) -> Tuple[float, Array]:
     """
     Cross entropy loss.
     :return: loss and derivative
     """
     x = x.clip(min=eps, max=None)
     cost = (np.where(y == 1, -np.log(x), 0)).sum(axis=1)
-    d = np.where(y == 1, -1 / x, 0)
-    return cost.sum(), d
+    deriv = np.where(y == 1, -1 / x, 0)
+    return cost.sum(), deriv
 
 
-def one_hot(a: array, num_classes: int) -> array:
+def one_hot(array: Array, num_classes: int) -> Array:
     """
     :return: one hot vector :)
     """
-    return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
+    return np.squeeze(np.eye(num_classes)[array.reshape(-1)])
 
 
-def minibatch(x: array, y: array, batch_size: int) -> Iterator[Tuple[array, array]]:
+def minibatch(x: Array, y: Array, batch_size: int) -> Iterator[Tuple[Array, Array]]:
+    """
+    Divides dataset into parts.
+    """
     for i in range(0, x.shape[0], batch_size):
         x_batch = x[i : min(i + batch_size, x.shape[0]), :]
         y_batch = y[i : min(i + batch_size, y.shape[0]), :]

@@ -1,6 +1,10 @@
+"""
+Contains Optimizers
+"""
+
 from typing import Tuple, Callable, Optional, List, Dict
-from korgorusz.layers import Element
 import numpy as np
+from korgorusz.layers import Element
 
 
 class Optimizer:
@@ -17,18 +21,26 @@ class Optimizer:
 
 
 class SGDOptimizer(Optimizer):
-    def __init__(self, lr: float = 0.01):
-        self.lr = lr
+    """
+    Implements stochastic gradient descent.
+    """
+
+    def __init__(self, learning_rate: float = 0.01):
+        self.learning_rate = learning_rate
 
     def update(self, elements: List[Element]) -> None:
         for element in elements:
-            element.tensor -= self.lr * element.gradient
+            element.tensor -= self.learning_rate * element.gradient
             element.gradient.fill(0)
 
 
 class Momentum(Optimizer):
-    def __init__(self, lr: float = 0.01, momentum: float = 0.5):
-        self.lr = lr
+    """
+    Implements stochastic gradient descent with momentum.
+    """
+
+    def __init__(self, learning_rate: float = 0.01, momentum: float = 0.5):
+        self.learning_rate = learning_rate
         self.velocity: Dict = {}
         self.momentum = momentum
 
@@ -38,7 +50,7 @@ class Momentum(Optimizer):
                 self.velocity[i] = np.zeros_like(elements[i].gradient)
 
             self.velocity[i] = self.momentum * self.velocity[i] + elements[i].gradient
-            elements[i].tensor -= self.lr * self.velocity[i]
+            elements[i].tensor -= self.learning_rate * self.velocity[i]
 
             elements[i].gradient.fill(0)
 
@@ -46,7 +58,7 @@ class Momentum(Optimizer):
 class Adam(Optimizer):
     """
     Optimization algorithm good in a wide range of cases.
-    lr: learning rate
+    learning_rate: learning rate
     beta1: coefficient used for computing
         running averages of gradient and its square
     beta2: coefficient used for computing
@@ -56,12 +68,12 @@ class Adam(Optimizer):
 
     def __init__(
         self,
-        lr: float = 0.001,
+        learning_rate: float = 0.001,
         beta1: float = 0.9,
         beta2: float = 0.999,
         eps: float = 1e-07,
     ):
-        self.lr = lr
+        self.learning_rate = learning_rate
         self.beta1 = beta1
         self.beta2 = beta2
         self.eps = eps
@@ -91,7 +103,11 @@ class Adam(Optimizer):
 
             var_corrected = var / (1 - self.beta2 ** self.t)
             mean_corrected = mean / (1 - self.beta1 ** self.t)
-            update = self.lr * mean_corrected / (np.sqrt(var_corrected) + self.eps)
+            update = (
+                self.learning_rate
+                * mean_corrected
+                / (np.sqrt(var_corrected) + self.eps)
+            )
 
             elements[i].tensor -= update
             elements[i].gradient.fill(0)

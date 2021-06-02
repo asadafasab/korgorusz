@@ -1,3 +1,7 @@
+"""
+Tests a derivatives of a layers, activations.
+"""
+
 import pytest
 import numpy as np
 from korgorusz.layers import Linear
@@ -7,7 +11,7 @@ from korgorusz.tests.utils_for_test import isclose
 
 
 # pytorch code
-"""
+_ = """
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -38,6 +42,9 @@ for p in lin.parameters():
 
 
 def test_linear_backward():
+    """
+    Tests a derivative of a Linear layer.
+    """
     linear = Linear(5, 1)
     linear.weights.tensor = np.array(
         [[-0.4416076], [-0.2613170], [0.2723470], [0.4146298], [0.3575290]]

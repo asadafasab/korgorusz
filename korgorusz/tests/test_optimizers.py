@@ -1,3 +1,7 @@
+"""
+Tests if opimizers updates elements of layers.
+"""
+
 import pytest
 import numpy as np
 
@@ -10,46 +14,58 @@ from korgorusz.utils import mse, normalize
 np.random.seed(42)
 
 
-def optimizer_setup(generate_linear_dataset, optimizer, lr, epochs):
-    points, a_ = generate_linear_dataset
-    s = points.shape
-    points = normalize(points.reshape(1, -1)).reshape(s)
-    correct = np.array([a_] * points.shape[0])
-    optim = optimizer(lr=lr)
-    l1 = Linear(2, 4)
-    r = ReLU()
-    l2 = Linear(4, 1)
-    s = Sigmoid()
+def optimizer_setup(dataset, optimizer, learning_rate, epochs):
+    """
+    Setups dataset, neural network,...
+    """
+    points, out_ = dataset
+    shape = points.shape
+    points = normalize(points.reshape(1, -1)).reshape(shape)
+    correct = np.array([out_] * points.shape[0])
+    optim = optimizer(learning_rate=learning_rate)
+    fc1 = Linear(2, 4)
+    activation1 = ReLU()
+    fc2 = Linear(4, 1)
+    activation2 = Sigmoid()
 
     for _ in range(epochs):
-        a, d0 = l1.forward(points)
-        a, d1 = r.forward(a)
-        a, d2 = l2.forward(a)
-        a, d3 = s.forward(a)
-        _, loss = mse(a, a_)
-        d0(d1(d2(d3(loss))))
+        out, deriv0 = fc1.forward(points)
+        out, deriv1 = activation1.forward(out)
+        out, deriv2 = fc2.forward(out)
+        out, deriv3 = activation2.forward(out)
+        _, loss = mse(out, out_)
+        deriv0(deriv1(deriv2(deriv3(loss))))
         elements = []
-        elements.extend(l1.elements)
-        elements.extend(l2.elements)
+        elements.extend(fc1.elements)
+        elements.extend(fc2.elements)
         optim.update(elements)
 
-    out, _ = l1.forward(points)
-    out, _ = r.forward(out)
-    out, _ = l2.forward(out)
-    out, _ = s.forward(out)
+    out, _ = fc1.forward(points)
+    out, _ = activation1.forward(out)
+    out, _ = fc2.forward(out)
+    out, _ = activation2.forward(out)
     return out, correct
 
 
-def test_SGD(generate_linear_dataset):
-    a, correct = optimizer_setup(generate_linear_dataset, SGDOptimizer, 0.3, 16)
-    assert isclose(correct, a, abs_tol=0.01)
+def test_sgd(generate_linear_dataset):
+    """
+    Tests SGD optimizer
+    """
+    out, correct = optimizer_setup(generate_linear_dataset, SGDOptimizer, 0.3, 16)
+    assert isclose(correct, out, abs_tol=0.01)
 
 
 def test_momentum(generate_linear_dataset):
-    a, correct = optimizer_setup(generate_linear_dataset, Momentum, 0.3, 16)
-    assert isclose(a, correct, abs_tol=0.01)
+    """
+    Tests Momentum optimizer
+    """
+    out, correct = optimizer_setup(generate_linear_dataset, Momentum, 0.3, 16)
+    assert isclose(out, correct, abs_tol=0.01)
 
 
 def test_adam(generate_linear_dataset):
-    a, correct = optimizer_setup(generate_linear_dataset, Adam, 0.2, 16)
-    assert isclose(a, correct, abs_tol=0.1)
+    """
+    Tests Adam optimizer
+    """
+    out, correct = optimizer_setup(generate_linear_dataset, Adam, 0.2, 16)
+    assert isclose(out, correct, abs_tol=0.1)

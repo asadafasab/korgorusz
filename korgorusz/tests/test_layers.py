@@ -1,3 +1,6 @@
+"""
+Tests the layers.
+"""
 import pytest
 import numpy as np
 from korgorusz.layers import (
@@ -16,6 +19,9 @@ np.random.seed(42)
 
 
 def test_relu(sample_array):
+    """
+    Test a ReLU function
+    """
     correct = np.array([[10, 1, 0, 3, 0, 0, 9], [5, 6, 2, 3, 0, 7, 2]])
     activation = ReLU()
     out, _ = activation.forward(sample_array)
@@ -23,6 +29,9 @@ def test_relu(sample_array):
 
 
 def test_softmax(sample_array):
+    """
+    Test a Softmax function
+    """
     correct = np.array(
         [
             [
@@ -46,12 +55,15 @@ def test_softmax(sample_array):
         ]
     )
 
-    sm = Softmax()
-    out, _ = sm.forward(sample_array)
+    activation = Softmax()
+    out, _ = activation.forward(sample_array)
     assert isclose(out, correct)
 
 
 def test_sigmoid(sample_array):
+    """
+    Test a Sigmoid function
+    """
     correct = np.array(
         [
             [
@@ -75,12 +87,15 @@ def test_sigmoid(sample_array):
         ]
     )
 
-    sig = Sigmoid()
-    out, _ = sig.forward(sample_array)
+    activation = Sigmoid()
+    out, _ = activation.forward(sample_array)
     assert isclose(out, correct)
 
 
 def test_linear(sample_array):
+    """
+    Test a Linear layer
+    """
     rand = np.random.randn(64, 20)
     lin = Linear(20, 30)
     assert lin.forward(rand)[0].shape == (64, 30)
@@ -99,14 +114,20 @@ def test_linear(sample_array):
 
 
 def test_dropout(sample_array):
+    """
+    Test if dropout is working
+    """
     sample_array += 1
-    d = Dropout(0.5)
-    out, _ = d.forward(sample_array)
+    drop = Dropout(0.5)
+    out, _ = drop.forward(sample_array)
 
     assert np.count_nonzero(out == 0) >= 3
 
 
 def test_layer_norm(sample_array):
+    """
+    Test LayerNorm layer.
+    """
     correct = np.array(
         [
             [
@@ -129,12 +150,15 @@ def test_layer_norm(sample_array):
             ],
         ]
     )
-    ln = LayerNorm(7)
-    out, _ = ln.forward(sample_array)
+    norm = LayerNorm(7)
+    out, _ = norm.forward(sample_array)
     assert isclose(out, correct)
 
 
 def test_embeding(rows_array):
+    """
+    Tests an embedding.
+    """
     emb = Embedding(6, 4)
     out, _ = emb.forward(rows_array)
     assert out.shape == (5, 4)
