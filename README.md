@@ -71,6 +71,7 @@ pip install korgorusz/.[dev]
 python -m pytest korgorusz    # test suite
 python -m mypy korgorusz      # type checks
 python -m black korgorusz     # formatting
+python -m pylint korgorusz    # linter
 ```
 
 ## Implemented Algorithms

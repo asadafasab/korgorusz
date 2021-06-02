@@ -2,7 +2,7 @@
 """
 Implementation of attention from Transformers
 """
-
+import numpy as np
 from korgorusz.layers import LayerNorm, Linear, Dropout, Softmax, Array
 
 
@@ -90,7 +90,7 @@ class MultiHeadAttention:
             values.transpose(0, 2, 1),
         )
         if mask is not None:
-            mask = mask.unsqueeze(1)
+            mask = np.expand_dims(mask, axis=1)
 
         attention = self.attention.forward(query, keys, values, mask=mask)
 
