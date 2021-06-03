@@ -27,5 +27,6 @@ jobs:
         run: mypy korgorusz
       - uses: ricardochaves/python-lint@v1.4.0
         with:
+          python-root-list: korgorusz
           use-mypy: false
           extra-pylint-options: "-d R0903 --good-names=l2,x,y,i"
