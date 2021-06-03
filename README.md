@@ -24,35 +24,26 @@
 import numpy as np
 
 from korgorusz.optimizers import SGDOptimizer
-from korgorusz.layers import ReLU,Linear,Sigmoid
-from korgorusz.utils import minibatch,mse,Model
+from korgorusz.layers import Linear
+from korgorusz.activations import ReLU, Sigmoid
+from korgorusz.utils import minibatch, mse, Model
 
 x = np.random.randn(5,4)
 y = np.random.randn(5,2)
 
-class ModelLearn(Model):
-    def __init__(self):
-        super().__init__()
-        self.layers=[
-            Linear(4, 8),
-            ReLU(),
-            # ...
-            Linear(8, 2),
-            Sigmoid()]
-
-    def forward(self, X):
-        for l in self.layers:
-            X, d = l.forward(X)
-            self.add_derivative(d)
-        return X
 optim = SGDOptimizer(learning_rate=0.01)
-ml = ModelLearn()
+model = Model([
+    Linear(4, 8),
+    ReLU(),
+    # ...
+    Linear(8, 2),
+    Sigmoid()])
 
-for e in range(16):
-    pred = ml.forward(x)
+for e in range(8):
+    pred = model.forward(x)
     loss, d = mse(pred,y)
-    ml.backpropagation(d)
-    ml.update(ml.layers,optim)
+    ml.backward(d)
+    optim.update(model.layers_elements())
 ```
 More examples in the notebooks.
 
