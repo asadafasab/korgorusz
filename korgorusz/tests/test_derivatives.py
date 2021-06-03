@@ -54,10 +54,10 @@ def test_linear_backward():
     arr = np.array([[1.0, 2, 3, 2, 1], [1, 0, 2, 1, 3], [3, 3, 3, 2, 1]])
     target = np.array([[0.5, 0, 1], [1, 0, 0], [1, 1, 0]])
     target = np.array([[0.5], [1], [1]])
-    out, back = linear.forward(arr)
+    out = linear.forward(arr)
     loss = mse(out, target)
 
-    back(loss[1])
+    linear.backward(loss[1])
 
     correct_weight_grad = np.array(
         [[-0.1163296], [-0.1501397], [1.8008353], [0.9800253], [2.1440001]]
