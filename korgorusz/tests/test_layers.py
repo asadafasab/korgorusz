@@ -3,17 +3,10 @@
 Tests the layers.
 """
 import numpy as np
-from korgorusz.layers import (
-    Linear,
-    ReLU,
-    Sigmoid,
-    Softmax,
-    Dropout,
-    LayerNorm,
-    Embedding,
-)
-from korgorusz.tests.utils_for_test import sample_array, isclose, rows_array
 
+from korgorusz.activations import ReLU, Sigmoid, Softmax
+from korgorusz.layers import Dropout, Embedding, LayerNorm, Linear
+from korgorusz.tests.utils_for_test import isclose, rows_array, sample_array
 
 np.random.seed(42)
 
@@ -24,7 +17,7 @@ def test_relu(sample_array):
     """
     correct = np.array([[10, 1, 0, 3, 0, 0, 9], [5, 6, 2, 3, 0, 7, 2]])
     activation = ReLU()
-    out, _ = activation.forward(sample_array)
+    out = activation.forward(sample_array)
     assert (correct == out).all()
 
 
@@ -56,7 +49,7 @@ def test_softmax(sample_array):
     )
 
     activation = Softmax()
-    out, _ = activation.forward(sample_array)
+    out = activation.forward(sample_array)
     assert isclose(out, correct)
 
 
@@ -88,7 +81,7 @@ def test_sigmoid(sample_array):
     )
 
     activation = Sigmoid()
-    out, _ = activation.forward(sample_array)
+    out = activation.forward(sample_array)
     assert isclose(out, correct)
 
 
@@ -98,7 +91,7 @@ def test_linear(sample_array):
     """
     rand = np.random.randn(64, 20)
     lin = Linear(20, 30)
-    assert lin.forward(rand)[0].shape == (64, 30)
+    assert lin.forward(rand).shape == (64, 30)
     correct = np.array(
         [
             [0.2300000, 0.2300000, 0.2300000, 0.2300000],
@@ -109,7 +102,7 @@ def test_linear(sample_array):
     lin = Linear(7, 4)
     lin.weights.tensor.fill(0.01)
     lin.bias.tensor.fill(0.01)
-    out, _ = lin.forward(sample_array)
+    out = lin.forward(sample_array)
     assert isclose(out, correct)
 
 
@@ -119,7 +112,7 @@ def test_dropout(sample_array):
     """
     sample_array += 1
     drop = Dropout(0.5)
-    out, _ = drop.forward(sample_array)
+    out = drop.forward(sample_array)
 
     assert np.count_nonzero(out == 0) >= 3
 
@@ -151,7 +144,7 @@ def test_layer_norm(sample_array):
         ]
     )
     norm = LayerNorm(7)
-    out, _ = norm.forward(sample_array)
+    out = norm.forward(sample_array)
     assert isclose(out, correct)
 
 
@@ -160,5 +153,5 @@ def test_embeding(rows_array):
     Tests an embedding.
     """
     emb = Embedding(6, 4)
-    out, _ = emb.forward(rows_array)
+    out = emb.forward(rows_array)
     assert out.shape == (5, 4)

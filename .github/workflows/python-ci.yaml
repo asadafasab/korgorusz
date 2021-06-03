@@ -25,4 +25,7 @@ jobs:
         run: pytest korgorusz
       - name: Type checking
         run: mypy korgorusz
-      - uses: whynothugo/python-linting@master
+      - uses: ricardochaves/python-lint@v1.4.0
+        with:
+          use-mypy: false
+          extra-pylint-options: "-d R0903 --good-names=l2,x,y,i"

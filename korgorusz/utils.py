@@ -2,46 +2,40 @@
 Mostly helper functions and classes that facilitate training.
 """
 
-import os
 import gzip
+import os
 import pickle
-from typing import Tuple, Callable, List, Iterator
+from typing import Iterator, List, Tuple
+
 import numpy as np
-from korgorusz.optimizers import Optimizer
-from korgorusz.layers import Base, Array
+
+from korgorusz.layers import Array, BaseLayer
 
 
 class Model:
-    """
-    Base class for creating model
-    """
+    """Helper class for management of layers"""
 
-    def __init__(self):
-        self.derivatives = []
+    def __init__(self, layers: List[BaseLayer]):
+        self.layers = layers
 
-    def backpropagation(self, deriv: Callable) -> None:
-        """
-        Inints a backpropagation and calculates all of the derivatives.
-        """
-        for func in reversed(self.derivatives):
-            deriv = func(deriv)
-        self.derivatives = []
+    def forward(self, x: Array) -> Array:
+        """Feed-forward of all layers"""
+        for layer in self.layers:
+            x = layer.forward(x)
+        return x
 
-    def update(self, layers: List[Base], optim: Optimizer) -> None:
-        """
-        Updates weights of elemnets.
-        """
+    def backward(self, derivative: Array) -> None:
+        """Backpropagation of error"""
+        x = derivative
+        for layer in reversed(self.layers):
+            x = layer.backward(x)
+
+    def layers_elements(self):
+        """Returns all elements of layers"""
         elements = []
-        for layer in layers:
+        for layer in self.layers:
             elements.extend(layer.elements)
-
-        optim.update(elements)
-
-    def add_derivative(self, func: Callable) -> None:
-        """
-        Adds the derivative function to derivatives list.
-        """
-        self.derivatives.append(func)
+        return elements
 
     def save(self, filename: str):
         """

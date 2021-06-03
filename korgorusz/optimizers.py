@@ -2,8 +2,10 @@
 Contains Optimizers
 """
 
-from typing import List, Dict
+from typing import Dict, List
+
 import numpy as np
+
 from korgorusz.layers import Element
 
 

@@ -3,7 +3,9 @@
 Implementation of attention from Transformers
 """
 import numpy as np
-from korgorusz.layers import LayerNorm, Linear, Dropout, Softmax, Array
+
+from korgorusz.activations import Softmax
+from korgorusz.layers import Array, Dropout, LayerNorm, Linear
 
 
 class Attention:
@@ -14,7 +16,7 @@ class Attention:
     def __init__(self, embed_size_pow: float, dropout_rate: float = 0.1):
         self.embed_size_pow = embed_size_pow
         self.dropout = Dropout(dropout_rate)
-        self.softmax = Softmax()
+        self.softmax = Softmax(dim=-1)
 
     def forward(self, queries: Array, keys: Array, values: Array, mask: Array = None):
         """
@@ -26,7 +28,7 @@ class Attention:
         if mask is not None:
             attention[mask == 0] = -1e9
 
-        attention, deriv = self.softmax.forward(attention, dim=-1)
+        attention, deriv = self.softmax.forward(attention)
         derivatives.append(deriv)
 
         attention, deriv = self.dropout.forward(attention)

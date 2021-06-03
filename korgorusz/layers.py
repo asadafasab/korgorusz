@@ -3,8 +3,8 @@ Contains layer, activations
 """
 import random
 from typing import Callable, List, Optional, Tuple
-import numpy as np
 
+import numpy as np
 
 Array = np.ndarray
 
@@ -19,7 +19,7 @@ class Element:
         self.gradient = np.zeros_like(self.tensor)
 
 
-class Base:
+class BaseLayer:
     """
     Base class for implementing different
     types of layers
@@ -27,6 +27,7 @@ class Base:
 
     def __init__(self):
         self.elements: List[Element] = []
+        self.backward: Callable = None
 
     def forward(self, x: Array):
         """
@@ -43,7 +44,7 @@ class Base:
         return element
 
 
-class Linear(Base):
+class Linear(BaseLayer):
     """
     Applies a linear transformation.
     """
@@ -56,19 +57,20 @@ class Linear(Base):
         if self.isbias:
             self.bias: Element = self.create_element(np.zeros(outputs))
 
-    def forward(self, x: Array) -> Tuple[Array, Callable]:
+    def forward(self, x: Array) -> Array:
         def backward(derivative: Array) -> Array:
             self.weights.gradient += x.T @ derivative
             if self.isbias:
                 self.bias.gradient += derivative.sum(axis=0)
             return derivative @ self.weights.tensor.T
 
+        self.backward = backward
         if self.isbias:
-            return x @ self.weights.tensor + self.bias.tensor, backward
-        return x @ self.weights.tensor, backward
+            return x @ self.weights.tensor + self.bias.tensor
+        return x @ self.weights.tensor
 
 
-class Dropout(Base):
+class Dropout(BaseLayer):
     """
     During training, randomly zeroes some of the elements of the input.
     """
@@ -77,7 +79,7 @@ class Dropout(Base):
         super().__init__()
         self.dropout_rate = dropout_rate
 
-    def forward(self, x) -> Tuple[Array, Callable]:
+    def forward(self, x) -> Array:
         nodes = int(x.shape[1] * self.dropout_rate)
         indices = sorted(random.sample(range(0, x.shape[1]), nodes))
         mask = np.ones_like(x)
@@ -86,10 +88,11 @@ class Dropout(Base):
         def backward(derivative: Array) -> Array:
             return derivative * mask
 
-        return x * mask, backward
+        self.backward = backward
+        return x * mask
 
 
-class LayerNorm(Base):
+class LayerNorm(BaseLayer):
     """
     Applies Layer Normalization over a mini-batch of inputs
     """
@@ -100,7 +103,7 @@ class LayerNorm(Base):
         self.weights: Element = self.create_element(np.ones(shape))
         self.bias: Element = self.create_element(np.zeros(shape))
 
-    def forward(self, x: Array) -> Tuple[Array, Callable]:
+    def forward(self, x: Array) -> Array:
         x_mean = x.mean(keepdims=True)
         x_var = np.var(x, keepdims=True)
         x_std = np.sqrt(x_var + self.eps)
@@ -123,10 +126,11 @@ class LayerNorm(Base):
                 )
             )
 
-        return (x_norm * self.weights.tensor) + self.bias.tensor, backward
+        self.backward = backward
+        return (x_norm * self.weights.tensor) + self.bias.tensor
 
 
-class Embedding(Base):
+class Embedding(BaseLayer):
     """
     A simple lookup table that stores embeddings of a fixed dictionary and size.
     """
@@ -146,7 +150,7 @@ class Embedding(Base):
             tensor = tensor[padding_idx] = 0
         self.weights = self.create_element(tensor)
 
-    def forward(self, x: Array) -> Tuple[Array, Callable]:
+    def forward(self, x: Array) -> Array:
         msg = "Error: Embeding input must int type"
         assert x.dtype == np.int64() or np.int32() or np.int16() or np.int8(), msg
 
@@ -154,44 +158,5 @@ class Embedding(Base):
             # trainable
             return derivative @ self.weights.tensor.T
 
-        return self.weights.tensor[x], backward
-
-
-class ReLU(Base):
-    """
-    Applies the rectified linear unit function element-wise.
-    """
-
-    def forward(self, x: Array) -> Tuple[Array, Callable]:
-        def backward(derivative: Array) -> Array:
-            return np.where(x > 0, derivative, 0)
-
-        return x * (x > 0), backward
-
-
-class Softmax(Base):
-    """
-    Applies the Softmax function to an n-dimensional input.
-    """
-
-    def forward(self, x: Array, dim: Optional[float] = 1) -> Tuple[Array, Callable]:
-        y = np.exp(x) / np.exp(x).sum(axis=dim)[:, None]
-
-        def backward(derivative: Array) -> Array:
-            return y * (derivative - (derivative * y).sum(axis=1)[:, None])
-
-        return y, backward
-
-
-class Sigmoid(Base):
-    """
-    Applies the element-wise function
-    """
-
-    def forward(self, x: Array) -> Tuple[Array, Callable]:
-        sig = 1 / (1 + np.exp(-x))
-
-        def backward(derivative: Array) -> Array:
-            return derivative * sig * (1 - sig)
-
-        return sig, backward
+        self.backward = backward
+        return self.weights.tensor[x]

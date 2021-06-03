@@ -5,11 +5,11 @@ Tests if opimizers updates elements of layers.
 
 import numpy as np
 
-from korgorusz.optimizers import SGDOptimizer, Momentum, Adam
-from korgorusz.tests.utils_for_test import isclose, generate_linear_dataset
-from korgorusz.layers import Linear, ReLU, Sigmoid
-from korgorusz.utils import mse, normalize
-
+from korgorusz.activations import ReLU, Sigmoid
+from korgorusz.layers import Linear
+from korgorusz.optimizers import Adam, Momentum, SGDOptimizer
+from korgorusz.tests.utils_for_test import generate_linear_dataset, isclose
+from korgorusz.utils import Model, mse, normalize
 
 np.random.seed(42)
 
@@ -23,28 +23,15 @@ def optimizer_setup(dataset, optimizer, learning_rate, epochs):
     points = normalize(points.reshape(1, -1)).reshape(shape)
     correct = np.array([out_] * points.shape[0])
     optim = optimizer(learning_rate=learning_rate)
-    fc1 = Linear(2, 4)
-    activation1 = ReLU()
-    fc2 = Linear(4, 1)
-    activation2 = Sigmoid()
-
+    model = Model([Linear(2, 4), ReLU(), Linear(4, 1), Sigmoid()])
     for _ in range(epochs):
-        out, deriv0 = fc1.forward(points)
-        out, deriv1 = activation1.forward(out)
-        out, deriv2 = fc2.forward(out)
-        out, deriv3 = activation2.forward(out)
-        _, loss = mse(out, out_)
-        deriv0(deriv1(deriv2(deriv3(loss))))
-        elements = []
-        elements.extend(fc1.elements)
-        elements.extend(fc2.elements)
-        optim.update(elements)
+        out = model.forward(points)
+        losss, loss = mse(out, out_)
+        print(losss)
+        model.backward(loss)
+        optim.update(model.layers_elements())
 
-    out, _ = fc1.forward(points)
-    out, _ = activation1.forward(out)
-    out, _ = fc2.forward(out)
-    out, _ = activation2.forward(out)
-    return out, correct
+    return model.forward(points), correct
 
 
 def test_sgd(generate_linear_dataset):
@@ -67,5 +54,5 @@ def test_adam(generate_linear_dataset):
     """
     Tests Adam optimizer
     """
-    out, correct = optimizer_setup(generate_linear_dataset, Adam, 0.2, 16)
+    out, correct = optimizer_setup(generate_linear_dataset, Adam, 0.1, 6)
     assert isclose(out, correct, abs_tol=0.1)
