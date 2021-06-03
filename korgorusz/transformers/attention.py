@@ -3,8 +3,9 @@
 Implementation of attention from Transformers
 """
 import numpy as np
-from korgorusz.layers import LayerNorm, Linear, Dropout, Array
+
 from korgorusz.activations import Softmax
+from korgorusz.layers import Array, Dropout, LayerNorm, Linear
 
 
 class Attention:

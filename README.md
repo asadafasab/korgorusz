@@ -59,10 +59,10 @@ pip install korgorusz/.[dev]
 
 ## Tests
 ```bash
-python -m pytest korgorusz    # test suite
-python -m mypy korgorusz      # type checks
-python -m black korgorusz     # formatting
-python -m pylint korgorusz    # linter
+pytest korgorusz    # test suite
+mypy korgorusz      # type checks
+black korgorusz     # formatting
+pylint korgorusz/ -d R0903 --good-names=l2,x,y,i # linter
 ```
 
 ## Implemented Algorithms

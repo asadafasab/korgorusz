@@ -1,9 +1,10 @@
 """Contains activation functions e.g. ReLU,Sigmoid."""
 
 from typing import Optional
+
 import numpy as np
 
-from korgorusz.layers import BaseLayer, Array
+from korgorusz.layers import Array, BaseLayer
 
 
 class ReLU(BaseLayer):

@@ -3,15 +3,10 @@
 Tests the layers.
 """
 import numpy as np
-from korgorusz.layers import (
-    Linear,
-    Dropout,
-    LayerNorm,
-    Embedding,
-)
-from korgorusz.activations import ReLU, Sigmoid, Softmax
-from korgorusz.tests.utils_for_test import sample_array, isclose, rows_array
 
+from korgorusz.activations import ReLU, Sigmoid, Softmax
+from korgorusz.layers import Dropout, Embedding, LayerNorm, Linear
+from korgorusz.tests.utils_for_test import isclose, rows_array, sample_array
 
 np.random.seed(42)
 

@@ -4,11 +4,10 @@ Tests a derivatives of a layers, activations.
 """
 
 import numpy as np
+
 from korgorusz.layers import Linear
-from korgorusz.utils import mse
-
 from korgorusz.tests.utils_for_test import isclose
-
+from korgorusz.utils import mse
 
 # pytorch code
 _ = """

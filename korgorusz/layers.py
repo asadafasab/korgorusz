@@ -3,8 +3,8 @@ Contains layer, activations
 """
 import random
 from typing import Callable, List, Optional, Tuple
-import numpy as np
 
+import numpy as np
 
 Array = np.ndarray
 

@@ -2,12 +2,14 @@
 Mostly helper functions and classes that facilitate training.
 """
 
-import os
 import gzip
+import os
 import pickle
-from typing import Tuple, List, Iterator
+from typing import Iterator, List, Tuple
+
 import numpy as np
-from korgorusz.layers import BaseLayer, Array
+
+from korgorusz.layers import Array, BaseLayer
 
 
 class Model:

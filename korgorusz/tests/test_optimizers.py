@@ -5,12 +5,11 @@ Tests if opimizers updates elements of layers.
 
 import numpy as np
 
-from korgorusz.optimizers import SGDOptimizer, Momentum, Adam
-from korgorusz.tests.utils_for_test import isclose, generate_linear_dataset
-from korgorusz.layers import Linear
 from korgorusz.activations import ReLU, Sigmoid
-from korgorusz.utils import mse, normalize, Model
-
+from korgorusz.layers import Linear
+from korgorusz.optimizers import Adam, Momentum, SGDOptimizer
+from korgorusz.tests.utils_for_test import generate_linear_dataset, isclose
+from korgorusz.utils import Model, mse, normalize
 
 np.random.seed(42)
 
