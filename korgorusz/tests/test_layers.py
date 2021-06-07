@@ -6,7 +6,9 @@ import numpy as np
 
 from korgorusz.activations import ReLU, Sigmoid, Softmax
 from korgorusz.layers import Dropout, Embedding, LayerNorm, Linear
-from korgorusz.tests.utils_for_test import isclose, rows_array, sample_array
+from korgorusz.tests.utils_for_test import (isclose, loss_arrays, rows_array,
+                                            sample_array)
+from korgorusz.utils import cross_entropy, mae, mse
 
 np.random.seed(42)
 
@@ -155,3 +157,17 @@ def test_embeding(rows_array):
     emb = Embedding(6, 4)
     out = emb.forward(rows_array)
     assert out.shape == (5, 4)
+
+
+def test_mse(loss_arrays):
+    """Tests a Mean Squared Error Loss"""
+    correct = np.array([1.4553994572])
+    out = mse(*loss_arrays)
+    assert isclose(correct, out[0])
+
+
+def test_mae(loss_arrays):
+    """Tests a Mean Absolute Error Loss"""
+    correct = np.array([0.88932356])
+    out = mae(*loss_arrays)
+    assert isclose(correct, out[0])

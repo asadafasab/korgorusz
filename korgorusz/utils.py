@@ -93,15 +93,26 @@ def normalize(values, l2=True, axis=1):
 
 def mse(x: Array, y: Array) -> Tuple[float, Array]:
     """
-    Mean squared error loss.
+    Mean squared Error loss.
     :return: loss and derivative
     """
+    # n = y.shape[0]
+    # return ((x - y) ** 2).mean(), ((2*(n+1))*(x-y))/n
     return ((x - y) ** 2).mean(), (x - y) / 1.5
+
+
+def mae(x: Array, y: Array) -> Tuple[float, Array]:
+    """
+    Mean Absolute Error loss.
+    :return: loss and derivative
+    """
+    lenght = y.shape[0]
+    return np.abs(x-y).mean(), ((lenght+1)*(x-y))/(lenght*np.abs(x-y))
 
 
 def cross_entropy(x: Array, y: Array, eps: float = 1e-8) -> Tuple[float, Array]:
     """
-    Cross entropy loss.
+    Cross-Entropy loss.
     :return: loss and derivative
     """
     x = x.clip(min=eps, max=None)
@@ -122,6 +133,6 @@ def minibatch(x: Array, y: Array, batch_size: int) -> Iterator[Tuple[Array, Arra
     Divides dataset into parts.
     """
     for i in range(0, x.shape[0], batch_size):
-        x_batch = x[i : min(i + batch_size, x.shape[0]), :]
-        y_batch = y[i : min(i + batch_size, y.shape[0]), :]
+        x_batch = x[i: min(i + batch_size, x.shape[0]), :]
+        y_batch = y[i: min(i + batch_size, y.shape[0]), :]
         yield x_batch, y_batch

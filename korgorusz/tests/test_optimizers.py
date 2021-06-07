@@ -26,8 +26,7 @@ def optimizer_setup(dataset, optimizer, learning_rate, epochs):
     model = Model([Linear(2, 4), ReLU(), Linear(4, 1), Sigmoid()])
     for _ in range(epochs):
         out = model.forward(points)
-        losss, loss = mse(out, out_)
-        print(losss)
+        _, loss = mse(out, out_)
         model.backward(loss)
         optim.update(model.layers_elements())
 
@@ -38,7 +37,8 @@ def test_sgd(generate_linear_dataset):
     """
     Tests SGD optimizer
     """
-    out, correct = optimizer_setup(generate_linear_dataset, SGDOptimizer, 0.3, 16)
+    out, correct = optimizer_setup(
+        generate_linear_dataset, SGDOptimizer, 0.3, 16)
     assert isclose(correct, out, abs_tol=0.01)
 
 
