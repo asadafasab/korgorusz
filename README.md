@@ -42,7 +42,7 @@ model = Model([
 for e in range(8):
     pred = model.forward(x)
     loss, d = mse(pred,y)
-    ml.backward(d)
+    model.backward(d)
     optim.update(model.layers_elements())
 ```
 More examples in the notebooks.
@@ -75,6 +75,11 @@ pylint korgorusz/ -d R0903 --good-names=l2,x,y,i # linter
 * SGD
 * Momentum
 * Adam
+
+### Losses
+* MSE
+* MAE
+* Cross-Entropy
 
 ### Layers
 * Linear
