@@ -1,6 +1,4 @@
-"""
-Contains layer, activations
-"""
+"""Contains layer"""
 import random
 from typing import Callable, List, Optional, Tuple
 
